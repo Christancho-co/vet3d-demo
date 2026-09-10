@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RampVet 3D · Plataforma Clínica Veterinaria con IA y Atlas 3D</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+              900: '#164e63',
+            },
+            vet: {
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              sky: '#0284c7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="h-full flex flex-col overflow-hidden select-none bg-slate-950 font-sans antialiased">
+
+  <!-- TOP HEADER -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-2.5 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i data-lucide="stethoscope" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-sm sm:text-base text-white tracking-wide">RampVet <span class="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800">3D + IA</span></h1>
+          <span class="inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/80 px-2 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Modo Campo Activo
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Gestión Clínica y Administrativa para Grandes Especies</p>
+      </div>
+    </div>
+
+    <!-- Active Patient Selector Bar -->
+    <div class="flex items-center gap-2">
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-lg px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:border-slate-600 transition" id="patientBadge">
+        <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">
+          🐎
+        </div>
+        <div class="text-left">
+          <div class="text-xs font-semibold text-white flex items-center gap-1.5">
+            <span>Relámpago</span>
+            <span class="text-[10px] text-slate-400 font-normal hidden md:inline">(Paso Fino Col.)</span>
+          </div>
+          <div class="text-[10px] text-slate-400">Criadero San Rafael · Pesebrera #12</div>
+        </div>
+        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 ml-1"></i>
+      </div>
+
+      <button id="btnNuevaAtencion" class="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-md shadow-cyan-900/30 transition active:scale-95">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <span>Nueva Atención</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APP WORKSPACE (GRID 2-COLUMNS ON DESKTOP, SPLIT ON MOBILE) -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+    <!-- LEFT / TOP: 3D INTERACTIVE ANATOMICAL ATLAS -->
+    <section class="relative flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden min-h-[360px] h-[45vh] lg:h-auto">
+      
+      <!-- 3D Canvas Container -->
+      <div id="canvas3d-container" class="absolute inset-0 cursor-grab active:cursor-grabbing w-full h-full" style="touch-action: none;">
+        <!-- WebGL Canvas will be injected here -->
+      </div>
+
+      <!-- 3D Controls Overlay Bar (Top Left) -->
+      <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl flex items-center gap-1.5">
+          <button id="btnEspecieEquino" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-cyan-600 text-white shadow-sm transition">
+            🐴 Equino
+          </button>
+          <button id="btnEspecieBovino" class="px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            🐮 Bovino
+          </button>
+        </div>
+
+        <!-- Camera Presets -->
+        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-1.5 shadow-xl flex flex-wrap gap-1 max-w-[260px]">
+          <span class="text-[10px] text-slate-400 w-full px-1 font-semibold uppercase tracking-wider">Cámaras Rápidas</span>
+          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="lateral">Lateral</button>
+          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="anterior">Cabeza</button>
+          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="posterior">Posterior</button>
+          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="pata_izq">Mano Izq.</button>
+          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="reset">Reset 360°</button>
+        </div>
+      </div>
+
+      <!-- Hotspots Quick Filter (Top Right) -->
+      <div class="absolute top-3 right-3 z-10">
+        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl flex flex-col gap-1.5 text-right">
+          <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Puntos Anatómicos</span>
+          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('ortopedia')">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+            <span>Mano Izquierda (Carpo)</span>
+          </div>
+          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('colico')">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
+            <span>Flanco Derecho (Cólico)</span>
+          </div>
+          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('dental')">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-sm shadow-purple-400/50"></span>
+            <span>Arcada Dental / Boca</span>
+          </div>
+          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('dorso')">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            <span>Cruz y Dorso Lumbar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Help Hint Floating Banner (Bottom) -->
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+        <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-full px-3.5 py-1 text-[11px] text-slate-300 shadow-lg flex items-center gap-2">
+          <i data-lucide="hand" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Gira con un dedo · Pellizca para zoom · Toca un punto para examinar</span>
+        </div>
+      </div>
+
+      <!-- Selected Body Part Popup Tag -->
+      <div id="zoneInfoTag" class="hidden absolute bottom-14 left-4 z-20 bg-slate-900/95 border border-cyan-500/60 rounded-xl p-3 shadow-2xl backdrop-blur-md max-w-xs transition-all">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div id="zoneTagDot" class="w-3 h-3 rounded-full bg-rose-500"></div>
+            <h4 id="zoneTagTitle" class="text-xs font-bold text-white">Carpo Miembro Anterior Izquierdo</h4>
+          </div>
+          <button onclick="document.getElementById('zoneInfoTag').classList.add('hidden')" class="text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+        <p id="zoneTagDesc" class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">
+          Punto anatómico crítico para diagnóstico de claudicaciones, tendinitis flexora y efusión articular.
+        </p>
+        <div class="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between">
+          <span class="text-[10px] text-cyan-400 font-semibold">📍 Registrado en 3D</span>
+          <button id="btnAsociarDictado" class="text-[10px] bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-2 py-1 rounded">
+            Dictar sobre esta zona
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT / BOTTOM: CLINICAL VOICE ENGINE & AI AUTO-STRUCTURING (THE CORE MVP FEATURE) -->
+    <section class="w-full lg:w-[480px] xl:w-[520px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col h-[58vh] lg:h-auto overflow-hidden z-20">
+
+      <!-- Tabs Header -->
+      <div class="px-4 pt-3 pb-2 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90">
+        <div class="flex items-center gap-1.5">
+          <button id="tabBtnAtencion" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 flex items-center gap-1.5">
+            <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>Dictado IA</span>
+          </button>
+          <button id="tabBtnHistorial" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5">
+            <i data-lucide="folder-clock" class="w-3.5 h-3.5"></i>
+            <span>Historial (5)</span>
+          </button>
+          <button id="tabBtnCobro" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5">
+            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+            <span>Cuenta Cobro</span>
+          </button>
+        </div>
+
+        <div class="text-[11px] text-slate-400 flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>IA VetGeni Core</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Tab Content Container -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+
+        <!-- VOICE RECORDER PANEL -->
+        <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+          
+          <!-- Background glow effect -->
+          <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider">Dictado de Campo Manos Libres</h3>
+            </div>
+            <span id="recordingTimer" class="text-xs font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+              00:00
+            </span>
+          </div>
+
+          <!-- Big Tactile Microphone Button -->
+          <div class="flex flex-col items-center justify-center my-3">
+            <button id="btnRecordMic" class="relative group w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-600 via-cyan-500 to-emerald-400 p-1 shadow-xl shadow-cyan-600/30 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95">
+              <div id="micRingPulse" class="absolute inset-0 rounded-full bg-cyan-400/30 scale-100 opacity-0 transition group-hover:opacity-100"></div>
+              <div class="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center text-cyan-400 group-hover:text-emerald-300 transition">
+                <i data-lucide="mic" id="micIcon" class="w-8 h-8 stroke-[2.2]"></i>
+              </div>
+            </button>
+            <p id="micStatusText" class="text-xs text-slate-300 font-medium mt-3 text-center">
+              Toca el micrófono para dictar con tu voz
+            </p>
+            <p class="text-[10px] text-slate-500 text-center">Habla natural: historia, hallazgos, medicamentos y días de control</p>
+          </div>
+
+          <!-- Audio Waveform Live Visualizer -->
+          <div id="waveformContainer" class="h-8 flex items-center justify-center gap-1 my-2 hidden">
+            <span class="wave-bar h-2 w-1 bg-cyan-400 rounded-full animate-wave-1"></span>
+            <span class="wave-bar h-5 w-1 bg-cyan-400 rounded-full animate-wave-2"></span>
+            <span class="wave-bar h-7 w-1 bg-emerald-400 rounded-full animate-wave-3"></span>
+            <span class="wave-bar h-3 w-1 bg-cyan-400 rounded-full animate-wave-1"></span>
+            <span class="wave-bar h-6 w-1 bg-emerald-400 rounded-full animate-wave-2"></span>
+            <span class="wave-bar h-4 w-1 bg-cyan-400 rounded-full animate-wave-3"></span>
+            <span class="wave-bar h-2 w-1 bg-cyan-400 rounded-full animate-wave-1"></span>
+          </div>
+
+          <!-- Demo Quick Cases (For Instant Demonstration) -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+                <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
+                Casos Típicos para Probar Rápido:
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="ortopedia">
+                <div class="font-bold text-cyan-400 flex items-center gap-1">
+                  <span>🦵 Ortopedia</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">Cojera nudo mano izq.</div>
+              </button>
+
+              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="colico">
+                <div class="font-bold text-amber-400 flex items-center gap-1">
+                  <span>⚠️ Cólico Agudo</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">Dolor flanco derecho</div>
+              </button>
+
+              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="dental">
+                <div class="font-bold text-purple-400 flex items-center gap-1">
+                  <span>🦷 Odontología</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">Puntas y ganchos molares</div>
+              </button>
+
+              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="reproduccion">
+                <div class="font-bold text-emerald-400 flex items-center gap-1">
+                  <span>🧬 Reproducción</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">Folículo preovulatorio</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Raw Transcript Box -->
+          <div class="mt-3">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+              <span>Transcripción de Voz en Crudo</span>
+              <span id="transcriptionStatus" class="text-cyan-400 font-normal lowercase">Listo</span>
+            </label>
+            <textarea id="rawTranscriptText" rows="3" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-sans resize-none transition" placeholder="Aquí aparecerá lo que hables o el caso seleccionado..."></textarea>
+          </div>
+
+          <!-- Action Button: Run AI Interpretation -->
+          <button id="btnProcessAI" class="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-cyan-600 via-cyan-500 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/30 flex items-center justify-center gap-2 transition active:scale-[0.98]">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Interpretar y Estructurar con IA</span>
+          </button>
+        </div>
+
+        <!-- AI STRUCTURED RESULT CARD (AUTO-FILLED CLINICAL REPORT) -->
+        <div id="structuredResultCard" class="bg-slate-950 border border-cyan-800/60 rounded-2xl p-4 shadow-xl space-y-3.5">
+          
+          <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-700/60 flex items-center justify-center text-cyan-400">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white">Historia Clínica Estructurada</h4>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span id="aiSpecialtyBadge" class="text-[10px] font-semibold text-cyan-300 bg-cyan-950/90 border border-cyan-800 px-2 py-0.2 rounded-full">
+                    Ortopedia Equina
+                  </span>
+                  <span class="text-[10px] text-slate-400">Modelo 3D Sincronizado</span>
+                </div>
+              </div>
+            </div>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <i data-lucide="check" class="w-3 h-3"></i> Listo para Guardar
+            </span>
+          </div>
+
+          <!-- Diagnóstico -->
+          <div>
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Diagnóstico Clínico</label>
+            <div id="aiDiagnosis" class="mt-1 text-xs text-white bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 font-medium leading-relaxed">
+              Claudicación grado 2 en miembro anterior izquierdo. Efusión sinovial en vaina digital y dolor a la flexión forzada de menudillo.
+            </div>
+          </div>
+
+          <!-- Tratamiento y Fármacos -->
+          <div>
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tratamiento & Prescripción</label>
+            <div id="aiTreatment" class="mt-1 text-xs text-slate-200 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+              <div class="flex items-center justify-between border-b border-slate-800/80 pb-1">
+                <span class="font-semibold text-emerald-400">💊 Fenilbutazona 20%</span>
+                <span class="text-[11px] text-slate-400">10 ml IV inicial, luego 5 ml c/24h x 4 días</span>
+              </div>
+              <div class="flex items-center justify-between border-b border-slate-800/80 pb-1">
+                <span class="font-semibold text-cyan-400">🧊 Crioterapia</span>
+                <span class="text-[11px] text-slate-400">Hielo local 20 min 3 veces/día</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-amber-400">🩹 Vendaje de descanso</span>
+                <span class="text-[11px] text-slate-400">Reposo estricto en pesebrera</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicios para Cuenta de Cobro (Detectados Automáticamente) -->
+          <div>
+            <div class="flex items-center justify-between">
+              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Servicios Detectados para Cobro</label>
+              <span class="text-[10px] text-amber-400 font-semibold" id="aiServicesTotal">Total: $270.000 COP</span>
+            </div>
+            <div id="aiServicesList" class="mt-1 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-xs space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-300">Consulta Especializada Ortopédica</span>
+                <span class="font-mono font-semibold text-white">$150.000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-300">Infiltración / Bloqueo diagnóstico</span>
+                <span class="font-mono font-semibold text-white">$120.000</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Próximo Control y Recordatorio -->
+          <div class="bg-amber-950/40 border border-amber-800/60 rounded-xl p-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="calendar-clock" class="w-4 h-4 text-amber-400"></i>
+              <div>
+                <div class="text-[10px] uppercase font-bold text-amber-300">Control Programado</div>
+                <div id="aiNextControl" class="text-xs font-semibold text-white">En 5 días (15 Septiembre 2026)</div>
+              </div>
+            </div>
+            <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-600/40 px-2 py-0.5 rounded">Agendado</span>
+          </div>
+
+          <!-- OUTPUT BUTTONS: WHATSAPP & CUENTA DE COBRO -->
+          <div class="pt-2 grid grid-cols-2 gap-2">
+            <button id="btnSendWhatsApp" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              <span>Enviar WhatsApp</span>
+            </button>
+            <button id="btnVerCuentaCobro" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95">
+              <i data-lucide="file-text" class="w-4 h-4 text-cyan-400"></i>
+              <span>Cuenta de Cobro</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: CUENTA DE COBRO EN FORMATO PDF / IMPRESIÓN OFICIAL COLOMBIANA -->
+  <div id="modalCuentaCobro" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white text-slate-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+      
+      <!-- Modal Toolbar -->
+      <div class="bg-slate-100 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="receipt" class="w-4 h-4 text-cyan-700"></i>
+          <span class="text-xs font-bold text-slate-800">Vista Previa Cuenta de Cobro (PDF)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="text-xs bg-cyan-700 hover:bg-cyan-800 text-white font-medium px-3 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Imprimir / PDF</span>
+          </button>
+          <button id="btnCloseModalCobro" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Document Sheet -->
+      <div class="p-6 overflow-y-auto space-y-4 text-xs font-sans" id="printableInvoice">
+        <!-- Header -->
+        <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-start">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 tracking-tight">CUENTA DE COBRO</h2>
+            <p class="text-slate-600 font-semibold">Consecutivo: <span class="text-cyan-800" id="invoiceNumber">CC-2026-0089</span></p>
+            <p class="text-[11px] text-slate-500">Fecha: <span id="invoiceDate">10 de Septiembre de 2026</span></p>
+          </div>
+          <div class="text-right">
+            <h3 class="font-bold text-slate-900 text-sm">DR. CHRISTIAN FELIPE REYES</h3>
+            <p class="text-slate-600 text-[11px]">Médico Veterinario Zootecnista</p>
+            <p class="text-slate-500 text-[11px]">T.P. No. 45892 · Nit/C.C. 1.082.900.000</p>
+            <p class="text-slate-500 text-[11px]">Santa Marta, Magdalena · Colombia</p>
+          </div>
+        </div>
+
+        <!-- Deudor / Cliente -->
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">DEBE A:</p>
+          <p class="font-bold text-slate-900">Dr. Christian Felipe Reyes</p>
+          <div class="mt-2 pt-2 border-t border-slate-200 grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span class="text-slate-500">Cliente / Finca:</span>
+              <span class="font-semibold text-slate-800 block" id="invoiceClient">Criadero San Rafael</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Paciente / Animal:</span>
+              <span class="font-semibold text-slate-800 block" id="invoicePatient">Relámpago (Paso Fino)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Concepto e Ítems -->
+        <div>
+          <h4 class="font-bold text-slate-800 mb-1.5 uppercase text-[11px]">Por concepto de servicios médico-veterinarios prestados:</h4>
+          <table class="w-full text-left border-collapse border border-slate-200">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 text-[10px] uppercase">
+                <th class="p-2 border border-slate-200">Descripción del Servicio</th>
+                <th class="p-2 border border-slate-200 text-right w-24">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="invoiceItemsTable" class="text-slate-800">
+              <tr>
+                <td class="p-2 border border-slate-200">Consulta clínica ortopédica equina en campo</td>
+                <td class="p-2 border border-slate-200 text-right font-mono">$150.000</td>
+              </tr>
+              <tr>
+                <td class="p-2 border border-slate-200">Infiltración articular y vendaje compresivo</td>
+                <td class="p-2 border border-slate-200 text-right font-mono">$120.000</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="bg-slate-50 font-bold text-slate-900">
+                <td class="p-2 border border-slate-200 text-right uppercase">Total a Pagar (COP):</td>
+                <td class="p-2 border border-slate-200 text-right font-mono text-sm text-cyan-900" id="invoiceGrandTotal">$270.000</td>
+              </tr>
+            </tfoot>
+          </table>
+          <p class="text-[10px] text-slate-500 italic mt-1" id="invoiceTotalWords">Son: Doscientos setenta mil pesos colombianos M/CTE.</p>
+        </div>
+
+        <!-- Datos de Pago Bancario -->
+        <div class="border border-cyan-200 bg-cyan-50/50 p-3 rounded-lg text-[11px] space-y-1">
+          <p class="font-bold text-cyan-950">FORMA DE PAGO / CONSIGNACIÓN:</p>
+          <p class="text-slate-700"><span class="font-semibold">Bancolombia Ahorros:</span> 209-000000-12</p>
+          <p class="text-slate-700"><span class="font-semibold">Nequi / Daviplata:</span> 300 123 4567</p>
+          <p class="text-slate-700"><span class="font-semibold">Titular:</span> Christian Felipe Reyes (C.C. 1.082.900.000)</p>
+        </div>
+
+        <!-- Firma -->
+        <div class="pt-6 flex justify-between items-end">
+          <div class="text-[10px] text-slate-400">
+            Documento generado digitalmente por RampVet 3D · Plataforma Médica Veterinaria
+          </div>
+          <div class="text-center w-48 border-t border-slate-400 pt-1">
+            <p class="font-serif italic text-sm text-slate-800">Christian F. Reyes</p>
+            <p class="text-[10px] font-bold text-slate-700">Firma del Profesional</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/three-viewer.bundle.js"></script>
+  <script type="module" src="js/app.js"></script>
+
+  <script>
+    // Initialize Lucide icons on load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
