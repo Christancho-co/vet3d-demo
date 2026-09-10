@@ -36,16 +36,6 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Import Maps for Three.js ES Modules -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="h-full flex flex-col overflow-hidden select-none bg-slate-950 font-sans antialiased">
@@ -95,10 +85,10 @@
   <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
     <!-- LEFT / TOP: 3D INTERACTIVE ANATOMICAL ATLAS -->
-    <section class="relative flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden min-h-[42vh] lg:min-h-0">
+    <section class="relative flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden min-h-[360px] h-[45vh] lg:h-auto">
       
       <!-- 3D Canvas Container -->
-      <div id="canvas3d-container" class="absolute inset-0 cursor-grab active:cursor-grabbing">
+      <div id="canvas3d-container" class="absolute inset-0 cursor-grab active:cursor-grabbing w-full h-full" style="touch-action: none;">
         <!-- WebGL Canvas will be injected here -->
       </div>
 
@@ -507,7 +497,7 @@
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="js/three-viewer.js"></script>
+  <script src="js/three-viewer.bundle.js"></script>
   <script type="module" src="js/app.js"></script>
 
   <script>

@@ -62,21 +62,29 @@ export function initThreeViewer() {
   container = document.getElementById('canvas3d-container');
   if (!container) return;
 
+  // Prevent multiple initializations
+  if (renderer) return;
+
   // Scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x030712); // Tailwind slate-950
 
+  // Calculate safe initial dimensions
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || Math.max(320, Math.floor(window.innerHeight * 0.45));
+  const aspect = width / (height || 1);
+
   // Camera
-  const aspect = container.clientWidth / container.clientHeight;
   camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
   camera.position.set(3.8, 2.6, 4.2);
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.innerHTML = '';
   container.appendChild(renderer.domElement);
 
   // Controls
@@ -618,9 +626,12 @@ export function setAnimalSpecies(species) {
 
 function onWindowResize() {
   if (!container || !renderer || !camera) return;
-  camera.aspect = container.clientWidth / container.clientHeight;
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || Math.max(320, Math.floor(window.innerHeight * 0.45));
+  if (width === 0 || height === 0) return;
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setSize(width, height);
 }
 
 // --- ANIMATION & RENDER LOOP ---
@@ -656,6 +667,14 @@ function animate(time) {
 window.focusHotspot = focusHotspot;
 window.setCameraView = setCameraView;
 window.setAnimalSpecies = setAnimalSpecies;
+window.initThreeViewer = initThreeViewer;
 
-// Initialize on DOM Ready
-window.addEventListener('DOMContentLoaded', initThreeViewer);
+// Auto-initialize even if DOMContentLoaded already fired
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(initThreeViewer, 10);
+} else {
+  window.addEventListener('DOMContentLoaded', initThreeViewer);
+}
+// Safety retries for async container layout
+window.addEventListener('load', () => setTimeout(onWindowResize, 100));
+

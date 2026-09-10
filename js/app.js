@@ -7,11 +7,17 @@ let recognition = null;
 let recordingSeconds = 0;
 let recordingTimerInterval = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   setupSpeechRecognition();
   setupEventListeners();
   applyCaseData(PRESET_CASES.ortopedia);
-});
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(initApp, 10);
+} else {
+  document.addEventListener('DOMContentLoaded', initApp);
+}
 
 // Setup Web Speech API (Microphone voice dictation)
 function setupSpeechRecognition() {
