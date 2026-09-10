@@ -10,6 +10,7 @@ let recordingTimerInterval = null;
 function initApp() {
   setupSpeechRecognition();
   setupEventListeners();
+  setupMobileNavigation();
   applyCaseData(PRESET_CASES.ortopedia);
 }
 
@@ -64,6 +65,83 @@ function setupSpeechRecognition() {
   }
 }
 
+// Mobile-First Tab Switcher (< 1024px)
+function setupMobileNavigation() {
+  const mTab3D = document.getElementById('mTab3D');
+  const mTabVoice = document.getElementById('mTabVoice');
+  const mTabReport = document.getElementById('mTabReport');
+  const section3D = document.getElementById('section3D');
+  const sectionClinical = document.getElementById('sectionClinical');
+  const panelDictado = document.getElementById('panelDictado');
+  const panelReporte = document.getElementById('panelReporte');
+
+  function setMobileView(view) {
+    const isMobile = window.innerWidth < 1024;
+
+    [mTab3D, mTabVoice, mTabReport].forEach(b => {
+      if (!b) return;
+      b.className = 'mobile-nav-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-400 hover:text-slate-200';
+    });
+
+    if (view === '3d') {
+      if (mTab3D) mTab3D.className = 'mobile-nav-btn active flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-cyan-950 text-cyan-300 border border-cyan-800/80 shadow-sm';
+      if (section3D) {
+        section3D.classList.remove('hidden');
+        section3D.classList.add('flex');
+      }
+      if (sectionClinical && isMobile) {
+        sectionClinical.classList.add('hidden');
+        sectionClinical.classList.remove('flex');
+      }
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 50);
+
+    } else if (view === 'voice') {
+      if (mTabVoice) mTabVoice.className = 'mobile-nav-btn active flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-cyan-950 text-cyan-300 border border-cyan-800/80 shadow-sm';
+      if (section3D && isMobile) {
+        section3D.classList.add('hidden');
+        section3D.classList.remove('flex');
+      }
+      if (sectionClinical) {
+        sectionClinical.classList.remove('hidden');
+        sectionClinical.classList.add('flex');
+      }
+      if (panelDictado) panelDictado.classList.remove('hidden');
+      if (panelReporte && isMobile) panelReporte.classList.add('hidden');
+
+    } else if (view === 'report') {
+      if (mTabReport) mTabReport.className = 'mobile-nav-btn active flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-cyan-950 text-cyan-300 border border-cyan-800/80 shadow-sm';
+      if (section3D && isMobile) {
+        section3D.classList.add('hidden');
+        section3D.classList.remove('flex');
+      }
+      if (sectionClinical) {
+        sectionClinical.classList.remove('hidden');
+        sectionClinical.classList.add('flex');
+      }
+      if (panelReporte) panelReporte.classList.remove('hidden');
+      if (panelDictado && isMobile) panelDictado.classList.add('hidden');
+    }
+  }
+
+  if (mTab3D) mTab3D.addEventListener('click', () => setMobileView('3d'));
+  if (mTabVoice) mTabVoice.addEventListener('click', () => setMobileView('voice'));
+  if (mTabReport) mTabReport.addEventListener('click', () => setMobileView('report'));
+
+  // Initial resize event to ensure correct initial layout
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+      if (section3D) section3D.classList.remove('hidden');
+      if (sectionClinical) sectionClinical.classList.remove('hidden');
+      if (panelDictado) panelDictado.classList.remove('hidden');
+      if (panelReporte) panelReporte.classList.remove('hidden');
+    }
+  });
+
+  window.setMobileView = setMobileView;
+}
+
 function setupEventListeners() {
   // Mic Button
   const btnRecordMic = document.getElementById('btnRecordMic');
@@ -73,7 +151,7 @@ function setupEventListeners() {
 
   // Quick Preset Case Buttons
   document.querySelectorAll('.case-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       const caseKey = btn.dataset.case;
       const data = PRESET_CASES[caseKey];
       if (data) {
@@ -105,7 +183,42 @@ function setupEventListeners() {
           <span>Interpretar y Estructurar con IA</span>
         `;
         lucide.createIcons();
+
+        // On mobile: smoothly switch to Report view to show the results
+        if (window.setMobileView && window.innerWidth < 1024) {
+          window.setMobileView('report');
+        }
       }, 500);
+    });
+  }
+
+  // Desktop tab buttons
+  const tabBtnAtencion = document.getElementById('tabBtnAtencion');
+  const tabBtnReporte = document.getElementById('tabBtnReporte');
+  const tabBtnCobro = document.getElementById('tabBtnCobro');
+  const panelDictado = document.getElementById('panelDictado');
+  const panelReporte = document.getElementById('panelReporte');
+
+  if (tabBtnAtencion && tabBtnReporte) {
+    tabBtnAtencion.addEventListener('click', () => {
+      tabBtnAtencion.className = 'tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 flex items-center gap-1.5 transition';
+      tabBtnReporte.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5';
+      if (panelDictado) panelDictado.classList.remove('hidden');
+      if (panelReporte) panelReporte.classList.remove('hidden');
+    });
+
+    tabBtnReporte.addEventListener('click', () => {
+      tabBtnReporte.className = 'tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 flex items-center gap-1.5 transition';
+      tabBtnAtencion.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5';
+      if (panelReporte) panelReporte.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  if (tabBtnCobro) {
+    tabBtnCobro.addEventListener('click', () => {
+      updateInvoiceData(currentParsedData);
+      const modal = document.getElementById('modalCuentaCobro');
+      if (modal) modal.classList.remove('hidden');
     });
   }
 
@@ -144,7 +257,12 @@ function setupEventListeners() {
       const zoneTitle = document.getElementById('zoneTagTitle').textContent;
       const textArea = document.getElementById('rawTranscriptText');
       textArea.value = `Inspección de ${zoneTitle}: `;
-      textArea.focus();
+      
+      // On mobile: switch to voice tab and focus
+      if (window.setMobileView && window.innerWidth < 1024) {
+        window.setMobileView('voice');
+      }
+      setTimeout(() => textArea.focus(), 150);
     });
   }
 }
@@ -186,7 +304,6 @@ function startVoiceRecording() {
       console.warn('Speech recognition start issue:', e);
     }
   } else {
-    // If browser doesn't have Web Speech API, inform user
     document.getElementById('transcriptionStatus').textContent = 'Simulación activa (navegador sin dictado nativo)';
   }
 }
@@ -318,7 +435,6 @@ function updateInvoiceData(data) {
   }
 }
 
-// Simple currency number to Colombian text
 function numeroALetras(valor) {
   if (valor === 270000) return 'Doscientos setenta mil';
   if (valor === 430000) return 'Cuatrocientos treinta mil';

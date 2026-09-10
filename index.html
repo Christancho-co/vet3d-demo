@@ -35,125 +35,134 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="h-full flex flex-col overflow-hidden select-none bg-slate-950 font-sans antialiased">
+<body class="h-full flex flex-col overflow-hidden bg-slate-950 font-sans antialiased">
 
-  <!-- TOP HEADER -->
-  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-2.5 flex items-center justify-between z-30 shrink-0">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-        <i data-lucide="stethoscope" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+  <!-- TOP HEADER (Compact and responsive) -->
+  <header class="bg-slate-900/95 border-b border-slate-800 px-3 sm:px-4 py-2 flex items-center justify-between z-30 shrink-0">
+    <!-- Brand / Title -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+        <i data-lucide="stethoscope" class="w-4 h-4 text-slate-950 stroke-[2.5]"></i>
       </div>
       <div>
-        <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm sm:text-base text-white tracking-wide">RampVet <span class="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800">3D + IA</span></h1>
-          <span class="inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/80 px-2 py-0.5 rounded-full">
+        <div class="flex items-center gap-1.5">
+          <h1 class="font-bold text-xs sm:text-sm text-white tracking-wide">RampVet <span class="text-cyan-400 text-[10px] px-1 py-0.5 rounded bg-cyan-950 border border-cyan-800">3D</span></h1>
+          <span class="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-1.5 py-0.2 rounded-full hidden xs:inline-flex">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Modo Campo Activo
+            Campo
           </span>
         </div>
-        <p class="text-[11px] text-slate-400 hidden sm:block">Gestión Clínica y Administrativa para Grandes Especies</p>
+        <p class="text-[10px] text-slate-400 hidden md:block">Gestión Clínica y Administrativa Equina / Bovina</p>
       </div>
     </div>
 
-    <!-- Active Patient Selector Bar -->
-    <div class="flex items-center gap-2">
-      <div class="bg-slate-800/80 border border-slate-700/80 rounded-lg px-3 py-1.5 flex items-center gap-2.5 cursor-pointer hover:border-slate-600 transition" id="patientBadge">
-        <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">
+    <!-- Active Patient & Species Controls -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Species Toggle -->
+      <div class="bg-slate-950 border border-slate-800 rounded-lg p-0.5 flex items-center">
+        <button id="btnEspecieEquino" class="px-2 py-1 text-[11px] font-semibold rounded-md bg-cyan-600 text-white shadow-sm transition flex items-center gap-1">
+          <span>🐴</span> <span class="hidden sm:inline">Equino</span>
+        </button>
+        <button id="btnEspecieBovino" class="px-2 py-1 text-[11px] font-semibold rounded-md text-slate-400 hover:text-white transition flex items-center gap-1">
+          <span>🐮</span> <span class="hidden sm:inline">Bovino</span>
+        </button>
+      </div>
+
+      <!-- Patient Pill Badge -->
+      <div class="bg-slate-800/90 border border-slate-700/80 rounded-lg px-2.5 py-1 flex items-center gap-1.5 cursor-pointer hover:border-slate-600 transition" id="patientBadge">
+        <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px] font-bold">
           🐎
         </div>
         <div class="text-left">
-          <div class="text-xs font-semibold text-white flex items-center gap-1.5">
+          <div class="text-[11px] font-bold text-white flex items-center gap-1 leading-tight">
             <span>Relámpago</span>
-            <span class="text-[10px] text-slate-400 font-normal hidden md:inline">(Paso Fino Col.)</span>
+            <span class="text-[9px] text-slate-400 font-normal hidden sm:inline">(Paso Fino)</span>
           </div>
-          <div class="text-[10px] text-slate-400">Criadero San Rafael · Pesebrera #12</div>
+          <div class="text-[9px] text-slate-400 hidden xs:block">Pesebrera #12</div>
         </div>
-        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 ml-1"></i>
       </div>
-
-      <button id="btnNuevaAtencion" class="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-md shadow-cyan-900/30 transition active:scale-95">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-        <span>Nueva Atención</span>
-      </button>
     </div>
   </header>
 
-  <!-- MAIN APP WORKSPACE (GRID 2-COLUMNS ON DESKTOP, SPLIT ON MOBILE) -->
+  <!-- MOBILE SEGMENTED VIEW NAVIGATION (Visible only on mobile/tablet screens < 1024px) -->
+  <nav id="mobileTabBar" class="lg:hidden bg-slate-900/90 border-b border-slate-800 px-2 py-1.5 flex items-center justify-between gap-1 z-30 shrink-0 backdrop-blur-md">
+    <button id="mTab3D" class="mobile-nav-btn active flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-cyan-950 text-cyan-300 border border-cyan-800/80 shadow-sm">
+      <i data-lucide="box" class="w-3.5 h-3.5"></i>
+      <span>Visor 3D</span>
+    </button>
+    <button id="mTabVoice" class="mobile-nav-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-400 hover:text-slate-200">
+      <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+      <span>Dictado IA</span>
+    </button>
+    <button id="mTabReport" class="mobile-nav-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-400 hover:text-slate-200">
+      <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+      <span>Reporte & Cobro</span>
+    </button>
+  </nav>
+
+  <!-- MAIN APP WORKSPACE -->
   <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
-    <!-- LEFT / TOP: 3D INTERACTIVE ANATOMICAL ATLAS -->
-    <section class="relative flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden min-h-[360px] h-[45vh] lg:h-auto">
+    <!-- 1. 3D INTERACTIVE ANATOMICAL ATLAS SECTION -->
+    <section id="section3D" class="relative flex-1 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col overflow-hidden h-full w-full">
       
       <!-- 3D Canvas Container -->
       <div id="canvas3d-container" class="absolute inset-0 cursor-grab active:cursor-grabbing w-full h-full" style="touch-action: none;">
-        <!-- WebGL Canvas will be injected here -->
+        <!-- WebGL Canvas injected here -->
       </div>
 
-      <!-- 3D Controls Overlay Bar (Top Left) -->
-      <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl flex items-center gap-1.5">
-          <button id="btnEspecieEquino" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-cyan-600 text-white shadow-sm transition">
-            🐴 Equino
+      <!-- TOP: HORIZONTAL SCROLLING ANATOMICAL HOTSPOT CHIPS (Never overlaps, ultra sleek) -->
+      <div class="absolute top-2.5 left-2 right-2 z-10 overflow-x-auto no-scrollbar py-0.5">
+        <div class="flex items-center gap-1.5 min-w-max bg-slate-900/80 backdrop-blur-md border border-slate-800/90 rounded-full px-2.5 py-1.5 shadow-xl">
+          <span class="text-[10px] uppercase font-bold text-slate-400 mr-1 pl-1 flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3 h-3 text-cyan-400"></i>
+            <span>Zonas 3D:</span>
+          </span>
+          <button class="hotspot-chip px-2.5 py-1 rounded-full text-xs font-medium bg-rose-950/80 border border-rose-800 text-rose-300 flex items-center gap-1.5 active:scale-95 transition" onclick="window.focusHotspot('ortopedia')">
+            <span class="w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+            <span>Mano Izq (Carpo)</span>
           </button>
-          <button id="btnEspecieBovino" class="px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-            🐮 Bovino
+          <button class="hotspot-chip px-2.5 py-1 rounded-full text-xs font-medium bg-amber-950/80 border border-amber-800 text-amber-300 flex items-center gap-1.5 active:scale-95 transition" onclick="window.focusHotspot('colico')">
+            <span class="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
+            <span>Flanco (Cólico)</span>
+          </button>
+          <button class="hotspot-chip px-2.5 py-1 rounded-full text-xs font-medium bg-purple-950/80 border border-purple-800 text-purple-300 flex items-center gap-1.5 active:scale-95 transition" onclick="window.focusHotspot('dental')">
+            <span class="w-2 h-2 rounded-full bg-purple-500 shadow-sm shadow-purple-500/50"></span>
+            <span>Arcada Dental</span>
+          </button>
+          <button class="hotspot-chip px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 border border-emerald-800 text-emerald-300 flex items-center gap-1.5 active:scale-95 transition" onclick="window.focusHotspot('dorso')">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+            <span>Cruz / Dorso</span>
+          </button>
+          <button class="hotspot-chip px-2.5 py-1 rounded-full text-xs font-medium bg-sky-950/80 border border-sky-800 text-sky-300 flex items-center gap-1.5 active:scale-95 transition" onclick="window.focusHotspot('corvejon')">
+            <span class="w-2 h-2 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50"></span>
+            <span>Corvejón Post.</span>
           </button>
         </div>
+      </div>
 
-        <!-- Camera Presets -->
-        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-1.5 shadow-xl flex flex-wrap gap-1 max-w-[260px]">
-          <span class="text-[10px] text-slate-400 w-full px-1 font-semibold uppercase tracking-wider">Cámaras Rápidas</span>
-          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="lateral">Lateral</button>
-          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="anterior">Cabeza</button>
-          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="posterior">Posterior</button>
-          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="pata_izq">Mano Izq.</button>
-          <button class="cam-btn text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition" data-view="reset">Reset 360°</button>
+      <!-- BOTTOM: FLOATING CAMERA PRESET CONTROLS PILL -->
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-auto max-w-[95%]">
+        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800/90 rounded-full px-3 py-1 shadow-2xl flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <i data-lucide="camera" class="w-3.5 h-3.5 text-slate-400 mr-0.5"></i>
+          <button class="cam-btn text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 hover:text-white transition whitespace-nowrap active:scale-95" data-view="lateral">Lateral</button>
+          <button class="cam-btn text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 hover:text-white transition whitespace-nowrap active:scale-95" data-view="anterior">Cabeza</button>
+          <button class="cam-btn text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 hover:text-white transition whitespace-nowrap active:scale-95" data-view="pata_izq">Mano Izq.</button>
+          <button class="cam-btn text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-800 text-slate-200 hover:text-white transition whitespace-nowrap active:scale-95" data-view="reset">Reset 360°</button>
         </div>
       </div>
 
-      <!-- Hotspots Quick Filter (Top Right) -->
-      <div class="absolute top-3 right-3 z-10">
-        <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2 shadow-xl flex flex-col gap-1.5 text-right">
-          <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Puntos Anatómicos</span>
-          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('ortopedia')">
-            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
-            <span>Mano Izquierda (Carpo)</span>
-          </div>
-          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('colico')">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
-            <span>Flanco Derecho (Cólico)</span>
-          </div>
-          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('dental')">
-            <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-sm shadow-purple-400/50"></span>
-            <span>Arcada Dental / Boca</span>
-          </div>
-          <div class="flex items-center gap-1.5 justify-end text-xs text-slate-300 cursor-pointer hover:text-amber-400 transition" onclick="window.focusHotspot('dorso')">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
-            <span>Cruz y Dorso Lumbar</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3D Help Hint Floating Banner (Bottom) -->
-      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-        <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-full px-3.5 py-1 text-[11px] text-slate-300 shadow-lg flex items-center gap-2">
-          <i data-lucide="hand" class="w-3.5 h-3.5 text-cyan-400"></i>
-          <span>Gira con un dedo · Pellizca para zoom · Toca un punto para examinar</span>
-        </div>
-      </div>
-
-      <!-- Selected Body Part Popup Tag -->
-      <div id="zoneInfoTag" class="hidden absolute bottom-14 left-4 z-20 bg-slate-900/95 border border-cyan-500/60 rounded-xl p-3 shadow-2xl backdrop-blur-md max-w-xs transition-all">
+      <!-- SELECTED BODY PART BOTTOM CARD -->
+      <div id="zoneInfoTag" class="hidden absolute bottom-14 left-3 right-3 sm:left-4 sm:right-auto sm:max-w-xs z-20 bg-slate-900/95 border border-cyan-500/70 rounded-2xl p-3 shadow-2xl backdrop-blur-md transition-all">
         <div class="flex items-start justify-between gap-2">
           <div class="flex items-center gap-2">
-            <div id="zoneTagDot" class="w-3 h-3 rounded-full bg-rose-500"></div>
+            <div id="zoneTagDot" class="w-3 h-3 rounded-full bg-rose-500 shrink-0"></div>
             <h4 id="zoneTagTitle" class="text-xs font-bold text-white">Carpo Miembro Anterior Izquierdo</h4>
           </div>
-          <button onclick="document.getElementById('zoneInfoTag').classList.add('hidden')" class="text-slate-400 hover:text-white">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <button onclick="document.getElementById('zoneInfoTag').classList.add('hidden')" class="text-slate-400 hover:text-white p-0.5">
+            <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
         <p id="zoneTagDesc" class="text-[11px] text-slate-300 mt-1.5 leading-relaxed">
@@ -161,26 +170,27 @@
         </p>
         <div class="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between">
           <span class="text-[10px] text-cyan-400 font-semibold">📍 Registrado en 3D</span>
-          <button id="btnAsociarDictado" class="text-[10px] bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-2 py-1 rounded">
-            Dictar sobre esta zona
+          <button id="btnAsociarDictado" class="text-[11px] bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 active:scale-95 shadow-md">
+            <i data-lucide="mic" class="w-3 h-3"></i>
+            <span>Dictar sobre esta zona</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT / BOTTOM: CLINICAL VOICE ENGINE & AI AUTO-STRUCTURING (THE CORE MVP FEATURE) -->
-    <section class="w-full lg:w-[480px] xl:w-[520px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col h-[58vh] lg:h-auto overflow-hidden z-20">
+    <!-- 2. CLINICAL VOICE & AI ENGINE SECTION (Full screen on mobile when selected) -->
+    <section id="sectionClinical" class="hidden lg:flex w-full lg:w-[480px] xl:w-[520px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex-col h-full overflow-hidden z-20">
 
-      <!-- Tabs Header -->
-      <div class="px-4 pt-3 pb-2 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90">
-        <div class="flex items-center gap-1.5">
-          <button id="tabBtnAtencion" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 flex items-center gap-1.5">
+      <!-- Desktop Tabs Header -->
+      <div class="px-4 pt-2.5 pb-2 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90">
+        <div class="flex items-center gap-1">
+          <button id="tabBtnAtencion" class="tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 flex items-center gap-1.5 transition">
             <i data-lucide="mic" class="w-3.5 h-3.5 text-cyan-400"></i>
             <span>Dictado IA</span>
           </button>
-          <button id="tabBtnHistorial" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5">
-            <i data-lucide="folder-clock" class="w-3.5 h-3.5"></i>
-            <span>Historial (5)</span>
+          <button id="tabBtnReporte" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5">
+            <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+            <span>Historia Clínica</span>
           </button>
           <button id="tabBtnCobro" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition flex items-center gap-1.5">
             <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
@@ -188,22 +198,19 @@
           </button>
         </div>
 
-        <div class="text-[11px] text-slate-400 flex items-center gap-1">
+        <div class="text-[11px] text-slate-400 hidden sm:flex items-center gap-1">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>IA VetGeni Core</span>
+          <span>IA Core</span>
         </div>
       </div>
 
-      <!-- Scrollable Tab Content Container -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <!-- Scrollable Panels Container -->
+      <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 custom-scrollbar">
 
-        <!-- VOICE RECORDER PANEL -->
-        <div class="bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+        <!-- PANEL 1: VOICE RECORDER -->
+        <div id="panelDictado" class="bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
           
-          <!-- Background glow effect -->
-          <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
               <h3 class="text-xs font-bold text-white uppercase tracking-wider">Dictado de Campo Manos Libres</h3>
@@ -247,28 +254,28 @@
               </span>
             </div>
             <div class="grid grid-cols-2 gap-1.5">
-              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="ortopedia">
+              <button class="case-btn text-left p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition active:scale-98" data-case="ortopedia">
                 <div class="font-bold text-cyan-400 flex items-center gap-1">
                   <span>🦵 Ortopedia</span>
                 </div>
                 <div class="text-[10px] text-slate-400 truncate">Cojera nudo mano izq.</div>
               </button>
 
-              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="colico">
+              <button class="case-btn text-left p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition active:scale-98" data-case="colico">
                 <div class="font-bold text-amber-400 flex items-center gap-1">
                   <span>⚠️ Cólico Agudo</span>
                 </div>
                 <div class="text-[10px] text-slate-400 truncate">Dolor flanco derecho</div>
               </button>
 
-              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="dental">
+              <button class="case-btn text-left p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition active:scale-98" data-case="dental">
                 <div class="font-bold text-purple-400 flex items-center gap-1">
                   <span>🦷 Odontología</span>
                 </div>
                 <div class="text-[10px] text-slate-400 truncate">Puntas y ganchos molares</div>
               </button>
 
-              <button class="case-btn text-left p-2 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition" data-case="reproduccion">
+              <button class="case-btn text-left p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 text-[11px] text-slate-200 transition active:scale-98" data-case="reproduccion">
                 <div class="font-bold text-emerald-400 flex items-center gap-1">
                   <span>🧬 Reproducción</span>
                 </div>
@@ -283,22 +290,22 @@
               <span>Transcripción de Voz en Crudo</span>
               <span id="transcriptionStatus" class="text-cyan-400 font-normal lowercase">Listo</span>
             </label>
-            <textarea id="rawTranscriptText" rows="3" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-sans resize-none transition" placeholder="Aquí aparecerá lo que hables o el caso seleccionado..."></textarea>
+            <textarea id="rawTranscriptText" rows="3" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-sans resize-none transition" placeholder="Aquí aparecerá lo que hables o el caso seleccionado..."></textarea>
           </div>
 
           <!-- Action Button: Run AI Interpretation -->
-          <button id="btnProcessAI" class="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-cyan-600 via-cyan-500 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/30 flex items-center justify-center gap-2 transition active:scale-[0.98]">
+          <button id="btnProcessAI" class="mt-3 w-full py-3 px-4 bg-gradient-to-r from-cyan-600 via-cyan-500 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/30 flex items-center justify-center gap-2 transition active:scale-[0.98]">
             <i data-lucide="sparkles" class="w-4 h-4"></i>
             <span>Interpretar y Estructurar con IA</span>
           </button>
         </div>
 
-        <!-- AI STRUCTURED RESULT CARD (AUTO-FILLED CLINICAL REPORT) -->
-        <div id="structuredResultCard" class="bg-slate-950 border border-cyan-800/60 rounded-2xl p-4 shadow-xl space-y-3.5">
+        <!-- PANEL 2: AI STRUCTURED RESULT CARD (CLINICAL REPORT & ACTIONS) -->
+        <div id="panelReporte" class="bg-slate-950 border border-cyan-800/60 rounded-2xl p-4 shadow-xl space-y-3.5">
           
           <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
             <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-700/60 flex items-center justify-center text-cyan-400">
+              <div class="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-700/60 flex items-center justify-center text-cyan-400 shrink-0">
                 <i data-lucide="clipboard-check" class="w-4 h-4"></i>
               </div>
               <div>
@@ -307,12 +314,12 @@
                   <span id="aiSpecialtyBadge" class="text-[10px] font-semibold text-cyan-300 bg-cyan-950/90 border border-cyan-800 px-2 py-0.2 rounded-full">
                     Ortopedia Equina
                   </span>
-                  <span class="text-[10px] text-slate-400">Modelo 3D Sincronizado</span>
+                  <span class="text-[10px] text-slate-400">3D Sincronizado</span>
                 </div>
               </div>
             </div>
-            <span class="text-[10px] text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <i data-lucide="check" class="w-3 h-3"></i> Listo para Guardar
+            <span class="text-[10px] text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full font-medium flex items-center gap-1 shrink-0">
+              <i data-lucide="check" class="w-3 h-3"></i> Listo
             </span>
           </div>
 
@@ -364,7 +371,7 @@
           <!-- Próximo Control y Recordatorio -->
           <div class="bg-amber-950/40 border border-amber-800/60 rounded-xl p-2.5 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <i data-lucide="calendar-clock" class="w-4 h-4 text-amber-400"></i>
+              <i data-lucide="calendar-clock" class="w-4 h-4 text-amber-400 shrink-0"></i>
               <div>
                 <div class="text-[10px] uppercase font-bold text-amber-300">Control Programado</div>
                 <div id="aiNextControl" class="text-xs font-semibold text-white">En 5 días (15 Septiembre 2026)</div>
@@ -375,11 +382,11 @@
 
           <!-- OUTPUT BUTTONS: WHATSAPP & CUENTA DE COBRO -->
           <div class="pt-2 grid grid-cols-2 gap-2">
-            <button id="btnSendWhatsApp" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+            <button id="btnSendWhatsApp" class="py-3 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-1.5 transition active:scale-95">
               <i data-lucide="message-circle" class="w-4 h-4"></i>
               <span>Enviar WhatsApp</span>
             </button>
-            <button id="btnVerCuentaCobro" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95">
+            <button id="btnVerCuentaCobro" class="py-3 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95">
               <i data-lucide="file-text" class="w-4 h-4 text-cyan-400"></i>
               <span>Cuenta de Cobro</span>
             </button>
@@ -390,7 +397,7 @@
     </section>
   </main>
 
-  <!-- MODAL: CUENTA DE COBRO EN FORMATO PDF / IMPRESIÓN OFICIAL COLOMBIANA -->
+  <!-- MODAL: CUENTA DE COBRO EN FORMATO PDF / IMPRESION OFICIAL COLOMBIANA -->
   <div id="modalCuentaCobro" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-white text-slate-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
       
@@ -412,7 +419,7 @@
       </div>
 
       <!-- Printable Document Sheet -->
-      <div class="p-6 overflow-y-auto space-y-4 text-xs font-sans" id="printableInvoice">
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs font-sans" id="printableInvoice">
         <!-- Header -->
         <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-start">
           <div>
@@ -444,7 +451,7 @@
           </div>
         </div>
 
-        <!-- Concepto e Ítems -->
+        <!-- Concepto e Items -->
         <div>
           <h4 class="font-bold text-slate-800 mb-1.5 uppercase text-[11px]">Por concepto de servicios médico-veterinarios prestados:</h4>
           <table class="w-full text-left border-collapse border border-slate-200">
@@ -476,7 +483,7 @@
 
         <!-- Datos de Pago Bancario -->
         <div class="border border-cyan-200 bg-cyan-50/50 p-3 rounded-lg text-[11px] space-y-1">
-          <p class="font-bold text-cyan-950">FORMA DE PAGO / CONSIGNACIÓN:</p>
+          <p class="font-bold text-cyan-950">FORMA DE PAGO / CONSIGNACION:</p>
           <p class="text-slate-700"><span class="font-semibold">Bancolombia Ahorros:</span> 209-000000-12</p>
           <p class="text-slate-700"><span class="font-semibold">Nequi / Daviplata:</span> 300 123 4567</p>
           <p class="text-slate-700"><span class="font-semibold">Titular:</span> Christian Felipe Reyes (C.C. 1.082.900.000)</p>

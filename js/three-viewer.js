@@ -71,12 +71,17 @@ export function initThreeViewer() {
 
   // Calculate safe initial dimensions
   const width = container.clientWidth || window.innerWidth;
-  const height = container.clientHeight || Math.max(320, Math.floor(window.innerHeight * 0.45));
+  const height = container.clientHeight || Math.max(340, Math.floor(window.innerHeight * 0.7));
   const aspect = width / (height || 1);
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
-  camera.position.set(3.8, 2.6, 4.2);
+  // Camera - Adjust FOV for vertical phone screens so the horse is completely framed
+  const fov = aspect < 1.0 ? 55 : 45;
+  camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 100);
+  if (aspect < 1.0) {
+    camera.position.set(4.5, 2.7, 4.8);
+  } else {
+    camera.position.set(3.8, 2.6, 4.2);
+  }
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -627,9 +632,11 @@ export function setAnimalSpecies(species) {
 function onWindowResize() {
   if (!container || !renderer || !camera) return;
   const width = container.clientWidth || window.innerWidth;
-  const height = container.clientHeight || Math.max(320, Math.floor(window.innerHeight * 0.45));
+  const height = container.clientHeight || Math.max(340, Math.floor(window.innerHeight * 0.7));
   if (width === 0 || height === 0) return;
-  camera.aspect = width / height;
+  const aspect = width / height;
+  camera.aspect = aspect;
+  camera.fov = aspect < 1.0 ? 55 : 45;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
 }
